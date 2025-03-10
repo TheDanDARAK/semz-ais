@@ -7,50 +7,50 @@ module.exports = {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
-        allowNull: false,
+        allowNull: false
       },
       route_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'routes',
-          key: 'id',
+          model: 'routes',  // таблица, созданная для маршрутных карт
+          key: 'id'
         },
         onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       equipment_id: {
         type: Sequelize.INTEGER,
-        allowNull: true,
+        allowNull: true, // операция может не привязываться к оборудованию, если не нужно
         references: {
-          model: 'equipment',
-          key: 'id',
+          model: 'equipment',  // таблица оборудования
+          key: 'id'
         },
         onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
+        onDelete: 'SET NULL'
       },
       step_number: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: false
       },
       description: {
         type: Sequelize.STRING,
-        allowNull: true,
+        allowNull: true
       },
       time_estimate: {
         type: Sequelize.FLOAT,
-        allowNull: true,
+        allowNull: true
       },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('NOW'),
+        defaultValue: Sequelize.fn('NOW')
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('NOW'),
-      },
+        defaultValue: Sequelize.fn('NOW')
+      }
     });
   },
 
