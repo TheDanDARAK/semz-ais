@@ -1,64 +1,43 @@
-
-const express = require('express');
-const router = express.Router();
-const { Parts } = require('../models');
-
-// GET /parts — получить список всех деталей
-router.get('/', async (req, res) => {
+const e = require('express')
+const r = e.Router()
+const { Part } = require('../models')
+const auth = require('../middleware/authMiddleware')
+r.get('/', auth, async (req, res) => {
   try {
-    const partsList = await Parts.findAll();
-    res.json(partsList);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    const ps = await Part.findAll()
+    res.json(ps)
+  } catch (x) {
+    res.status(500).json({ error: 'Ошибка сервера' })
   }
-});
-
-// POST /parts — создать новую деталь
-router.post('/', async (req, res) => {
+})
+r.post('/', auth, async (req, res) => {
   try {
-    const { name, description } = req.body;
-    const newPart = await Parts.create({ name, description });
-    res.status(201).json(newPart);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    const { name, description } = req.body
+    const p = await Part.create({ name, description })
+    res.status(201).json(p)
+  } catch (x) {
+    res.status(500).json({ error: 'Ошибка сервера' })
   }
-});
-
-// PUT /parts/:id — обновить данные детали
-router.put('/:id', async (req, res) => {
+})
+r.put('/:id', auth, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { name, description } = req.body;
-    const part = await Parts.findByPk(id);
-    if (!part) {
-      return res.status(404).json({ error: 'Part not found' });
-    }
-    part.name = name || part.name;
-    part.description = description || part.description;
-    await part.save();
-    res.json(part);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    const p = await Part.findByPk(req.params.id)
+    if (!p) return res.status(404).json({ error: 'Не найдена' })
+    const { name, description } = req.body
+    await p.update({ name, description })
+    res.json(p)
+  } catch (x) {
+    res.status(500).json({ error: 'Ошибка сервера' })
   }
-});
-
-// DELETE /parts/:id — удалить деталь
-router.delete('/:id', async (req, res) => {
+})
+r.delete('/:id', auth, async (req, res) => {
   try {
-    const { id } = req.params;
-    const part = await Parts.findByPk(id);
-    if (!part) {
-      return res.status(404).json({ error: 'Part not found' });
-    }
-    await part.destroy();
-    res.json({ message: 'Part deleted' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    const p = await Part.findByPk(req.params.id)
+    if (!p) return res.status(404).json({ error: 'Не найдена' })
+    await p.destroy()
+    res.json({ message: 'Удалено' })
+  } catch (x) {
+    res.status(500).json({ error: 'Ошибка сервера' })
   }
-});
-
-module.exports = router;
+})
+module.exports = r

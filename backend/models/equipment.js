@@ -1,32 +1,12 @@
-'use strict';
-const { Model } = require('sequelize');
-
-module.exports = (sequelize, DataTypes) => {
-  class Equipment extends Model {
-    // Здесь можно определить ассоциации, если они понадобятся
-    static associate(models) {
-      // Например: Equipment.hasMany(models.Operation, { foreignKey: 'equipment_id' });
-    }
+'use strict'
+module.exports = (s, D) => {
+  const Equipment = s.define('Equipment', {
+    name: { type: D.STRING, allowNull: false },
+    type: { type: D.STRING, allowNull: false },
+    status: { type: D.STRING, defaultValue: 'idle' }
+  }, {})
+  Equipment.associate = m => {
+    Equipment.hasMany(m.Operation, { foreignKey: 'equipmentId' })
   }
-  Equipment.init({
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    type: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    status: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'idle'  // 'idle' означает, что оборудование свободно
-    },
-  }, {
-    sequelize,
-    modelName: 'Equipment',
-    tableName: 'equipment', // Должно совпадать с названием таблицы в миграции
-    timestamps: true        // Добавляет поля createdAt и updatedAt
-  });
-  return Equipment;
-};
+  return Equipment
+}

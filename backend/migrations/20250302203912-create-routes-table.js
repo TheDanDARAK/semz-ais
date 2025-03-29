@@ -1,42 +1,15 @@
-'use strict';
-
+'use strict'
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('routes', {
-      id: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-        allowNull: false
-      },
-      part_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'parts',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
-      },
-      name: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('NOW')
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('NOW')
-      }
-    });
+  async up(q, S) {
+    await q.createTable('Routes', {
+      id: { allowNull: false, autoIncrement: true, primaryKey: true, type: S.INTEGER },
+      partId: { type: S.INTEGER, references: { model: 'Parts', key: 'id' }, onUpdate: 'CASCADE', onDelete: 'CASCADE', allowNull: false },
+      name: { type: S.STRING, allowNull: false },
+      createdAt: { allowNull: false, type: S.DATE, defaultValue: S.fn('NOW') },
+      updatedAt: { allowNull: false, type: S.DATE, defaultValue: S.fn('NOW') }
+    })
   },
-
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('routes');
+  async down(q, S) {
+    await q.dropTable('Routes')
   }
-};
+}

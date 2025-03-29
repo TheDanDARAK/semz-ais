@@ -1,35 +1,40 @@
-// src/components/UsersList.js
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-
+import React, { useEffect, useState } from 'react'
+import axios from '../axiosSetup'
 function UsersList() {
-  const [users, setUsers] = useState([]);
-
+  const [data, setData] = useState([])
+  const [err, setErr] = useState('')
+  async function load() {
+    try {
+      const r = await axios.get('/users')
+      setData(r.data)
+    } catch (x) {
+      setErr('Ошибка загрузки')
+    }
+  }
+  async function removeUser(id) {
+    try {
+      await axios.delete('/users/' + id)
+      setData(data.filter(u => u.id !== id))
+    } catch (x) {
+      setErr('Ошибка удаления')
+    }
+  }
   useEffect(() => {
-    // Отправляем GET-запрос на /users (proxy направит его на бэкенд)
-    axios.get('/users')
-      .then(response => {
-        setUsers(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching users:', error);
-      });
-  }, []);
-
+    load()
+  }, [])
   return (
-    <div>
-      <h2>Список пользователей</h2>
-      {users.length === 0 ? (
-        <p>Нет пользователей</p>
-      ) : (
-        <ul>
-          {users.map(user => (
-            <li key={user.id}>{user.full_name} — {user.email}</li>
-          ))}
-        </ul>
-      )}
+    <div style={{ padding: 20 }}>
+      <h2>Пользователи</h2>
+      {err && <p style={{ color: 'red' }}>{err}</p>}
+      <ul>
+        {data.map(u => (
+          <li key={u.id}>
+            {u.fullName} ({u.email}, {u.role})
+            <button onClick={() => removeUser(u.id)} style={{ marginLeft: 10 }}>Удалить</button>
+          </li>
+        ))}
+      </ul>
     </div>
-  );
+  )
 }
-
-export default UsersList;
+export default UsersList

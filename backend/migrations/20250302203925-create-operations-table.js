@@ -1,60 +1,18 @@
-'use strict';
-
+'use strict'
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('operations', {
-      id: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-        allowNull: false
-      },
-      route_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'routes',  // таблица, созданная для маршрутных карт
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
-      },
-      equipment_id: {
-        type: Sequelize.INTEGER,
-        allowNull: true, // операция может не привязываться к оборудованию, если не нужно
-        references: {
-          model: 'equipment',  // таблица оборудования
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL'
-      },
-      step_number: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      description: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      time_estimate: {
-        type: Sequelize.FLOAT,
-        allowNull: true
-      },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('NOW')
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('NOW')
-      }
-    });
+  async up(q, S) {
+    await q.createTable('Operations', {
+      id: { allowNull: false, autoIncrement: true, primaryKey: true, type: S.INTEGER },
+      routeId: { type: S.INTEGER, references: { model: 'Routes', key: 'id' }, onUpdate: 'CASCADE', onDelete: 'CASCADE' },
+      equipmentId: { type: S.INTEGER, references: { model: 'Equipment', key: 'id' }, onUpdate: 'CASCADE', onDelete: 'SET NULL' },
+      stepNumber: { type: S.INTEGER, allowNull: false },
+      description: { type: S.STRING },
+      timeEstimate: { type: S.INTEGER },
+      createdAt: { allowNull: false, type: S.DATE, defaultValue: S.fn('NOW') },
+      updatedAt: { allowNull: false, type: S.DATE, defaultValue: S.fn('NOW') }
+    })
   },
-
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('operations');
+  async down(q, S) {
+    await q.dropTable('Operations')
   }
-};
+}

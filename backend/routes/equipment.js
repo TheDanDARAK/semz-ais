@@ -1,66 +1,43 @@
-const express = require('express');
-const router = express.Router();
-const { Equipment } = require('../models'); // Импорт модели Equipment
-const authenticateToken = require('../middleware/authMiddleware');
-
-// GET /equipment — получить список всего оборудования
-router.get('/', authenticateToken, async (req, res) => {
+const e = require('express')
+const r = e.Router()
+const { Equipment } = require('../models')
+const auth = require('../middleware/authMiddleware')
+r.get('/', auth, async (req, res) => {
   try {
-    const equipmentList = await Equipment.findAll();
-    res.json(equipmentList);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    const eq = await Equipment.findAll()
+    res.json(eq)
+  } catch (x) {
+    res.status(500).json({ error: 'Ошибка сервера' })
   }
-});
-
-// POST /equipment — создать новый элемент оборудования
-router.post('/', async (req, res) => {
+})
+r.post('/', auth, async (req, res) => {
   try {
-    const { name, type, status } = req.body;
-    const newEquipment = await Equipment.create({ name, type, status });
-    res.status(201).json(newEquipment);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    const { name, type, status } = req.body
+    const eq = await Equipment.create({ name, type, status })
+    res.status(201).json(eq)
+  } catch (x) {
+    res.status(500).json({ error: 'Ошибка сервера' })
   }
-});
-
-// PUT /equipment/:id — обновить данные оборудования по его ID
-router.put('/:id', async (req, res) => {
+})
+r.put('/:id', auth, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { name, type, status } = req.body;
-    const equipmentItem = await Equipment.findByPk(id);
-    if (!equipmentItem) {
-      return res.status(404).json({ error: 'Equipment not found' });
-    }
-    // Обновляем поля, если они переданы
-    equipmentItem.name = name || equipmentItem.name;
-    equipmentItem.type = type || equipmentItem.type;
-    equipmentItem.status = status || equipmentItem.status;
-    await equipmentItem.save();
-    res.json(equipmentItem);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    const eq = await Equipment.findByPk(req.params.id)
+    if (!eq) return res.status(404).json({ error: 'Не найдено' })
+    const { name, type, status } = req.body
+    await eq.update({ name, type, status })
+    res.json(eq)
+  } catch (x) {
+    res.status(500).json({ error: 'Ошибка сервера' })
   }
-});
-
-// DELETE /equipment/:id — удалить оборудование по ID
-router.delete('/:id', async (req, res) => {
+})
+r.delete('/:id', auth, async (req, res) => {
   try {
-    const { id } = req.params;
-    const equipmentItem = await Equipment.findByPk(id);
-    if (!equipmentItem) {
-      return res.status(404).json({ error: 'Equipment not found' });
-    }
-    await equipmentItem.destroy();
-    res.json({ message: 'Equipment deleted' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    const eq = await Equipment.findByPk(req.params.id)
+    if (!eq) return res.status(404).json({ error: 'Не найдено' })
+    await eq.destroy()
+    res.json({ message: 'Удалено' })
+  } catch (x) {
+    res.status(500).json({ error: 'Ошибка сервера' })
   }
-});
-
-module.exports = router;
+})
+module.exports = r

@@ -1,73 +1,57 @@
-const express = require('express');
-const router = express.Router();
-const { Operations } = require('../models'); // Импортируем модель Operations
-
-// GET /operations — получить список всех операций
-router.get('/', async (req, res) => {
+const e = require('express')
+const r = e.Router()
+const { Operation, Route, Equipment } = require('../models')
+const auth = require('../middleware/authMiddleware')
+r.get('/', auth, async (req, res) => {
   try {
-    const operationsList = await Operations.findAll();
-    res.json(operationsList);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    const ops = await Operation.findAll()
+    res.json(ops)
+  } catch (x) {
+    res.status(500).json({ error: 'Ошибка сервера' })
   }
-});
-
-// POST /operations — создать новую операцию
-router.post('/', async (req, res) => {
+})
+r.post('/', auth, async (req, res) => {
   try {
-    const { route_id, equipment_id, step_number, description, time_estimate } = req.body;
-    const newOperation = await Operations.create({
-      route_id,
-      equipment_id,
-      step_number,
-      description,
-      time_estimate
-    });
-    res.status(201).json(newOperation);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// PUT /operations/:id — обновить операцию
-router.put('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { route_id, equipment_id, step_number, description, time_estimate } = req.body;
-    const operationItem = await Operations.findByPk(id);
-    if (!operationItem) {
-      return res.status(404).json({ error: 'Operation not found' });
+    const { routeId, equipmentId, stepNumber, description, timeEstimate } = req.body
+    const rt = await Route.findByPk(routeId)
+    if (!rt) return res.status(400).json({ error: 'Неверный routeId' })
+    if (equipmentId) {
+      const eq = await Equipment.findByPk(equipmentId)
+      if (!eq) return res.status(400).json({ error: 'Неверный equipmentId' })
     }
-    // Обновляем поля, если они переданы
-    if (route_id !== undefined) operationItem.route_id = route_id;
-    if (equipment_id !== undefined) operationItem.equipment_id = equipment_id;
-    if (step_number !== undefined) operationItem.step_number = step_number;
-    if (description !== undefined) operationItem.description = description;
-    if (time_estimate !== undefined) operationItem.time_estimate = time_estimate;
-    await operationItem.save();
-    res.json(operationItem);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    const op = await Operation.create({ routeId, equipmentId, stepNumber, description, timeEstimate })
+    res.status(201).json(op)
+  } catch (x) {
+    res.status(500).json({ error: 'Ошибка сервера' })
   }
-});
-
-// DELETE /operations/:id — удалить операцию
-router.delete('/:id', async (req, res) => {
+})
+r.put('/:id', auth, async (req, res) => {
   try {
-    const { id } = req.params;
-    const operationItem = await Operations.findByPk(id);
-    if (!operationItem) {
-      return res.status(404).json({ error: 'Operation not found' });
+    const op = await Operation.findByPk(req.params.id)
+    if (!op) return res.status(404).json({ error: 'Не найдено' })
+    const { routeId, equipmentId, stepNumber, description, timeEstimate } = req.body
+    if (routeId) {
+      const rt = await Route.findByPk(routeId)
+      if (!rt) return res.status(400).json({ error: 'Неверный routeId' })
     }
-    await operationItem.destroy();
-    res.json({ message: 'Operation deleted' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    if (equipmentId) {
+      const eq = await Equipment.findByPk(equipmentId)
+      if (!eq) return res.status(400).json({ error: 'Неверный equipmentId' })
+    }
+    await op.update({ routeId, equipmentId, stepNumber, description, timeEstimate })
+    res.json(op)
+  } catch (x) {
+    res.status(500).json({ error: 'Ошибка сервера' })
   }
-});
-
-module.exports = router;
+})
+r.delete('/:id', auth, async (req, res) => {
+  try {
+    const op = await Operation.findByPk(req.params.id)
+    if (!op) return res.status(404).json({ error: 'Не найдено' })
+    await op.destroy()
+    res.json({ message: 'Удалено' })
+  } catch (x) {
+    res.status(500).json({ error: 'Ошибка сервера' })
+  }
+})
+module.exports = r
